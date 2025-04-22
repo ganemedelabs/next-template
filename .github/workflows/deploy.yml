@@ -1,0 +1,67 @@
+# GitHub Actions workflow to deploy to Vercel.
+#
+# What it does:
+# 1. Triggers on push or pull request to the `main` branch.
+# 2. Checks out the repository code.
+# 3. Checks if the version in package.json has changed.
+# 4. If changed or first commit, deploys to Vercel using provided secrets.
+#
+# Important notes:
+# - Vercel does not offer free deployment for organization-owned repositories.
+# - You must manually configure Vercel for deployment before using this workflow:
+#
+#   1. Install Vercel CLI: `npm i -g vercel`.
+#   2. Run `vercel` and select your personal or organization's account for deployment scope.
+#   3. Obtain `orgId` and `projectId` from `.vercel/project.json` after setup.
+#   4. Generate a Vercel Account Token at https://vercel.com/account/tokens.
+#   5. Add secrets to your repository: `VERCEL_TOKEN`, `ORG_ID`, `PROJECT_ID`.
+#
+# - Deployment occurs automatically on version change after setup.
+
+name: Vercel Deployment Workflow
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    build_and_deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 2
+
+            - name: Check version change
+              id: version_check
+              run: |
+                  if git rev-parse HEAD~1 >/dev/null 2>&1; then
+                    if git diff HEAD~1 HEAD -- package.json | grep -E '"version":'; then
+                      echo "version_changed=true" >> $GITHUB_ENV
+                    else
+                      echo "version_changed=false" >> $GITHUB_ENV
+                    fi
+                  else
+                    echo "First commit detected. Proceeding with deployment."
+                    echo "version_changed=true" >> $GITHUB_ENV
+                  fi
+
+            - name: Exit if no version change
+              if: env.version_changed == 'false'
+              run: echo "No version change detected. Skipping deployment." && exit 0
+
+            - name: Deploy to Vercel
+              if: env.version_changed == 'true'
+              uses: amondnet/vercel-action@v20
+              id: vercel-deploy
+              with:
+                  vercel-token: ${{ secrets.VERCEL_TOKEN }}
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  vercel-args: ${{ github.event_name == 'push' && '--prod' || '' }}
+                  vercel-org-id: ${{ secrets.ORG_ID }}
+                  vercel-project-id: ${{ secrets.PROJECT_ID }}
