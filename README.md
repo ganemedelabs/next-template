@@ -92,16 +92,16 @@ This template uses a GitHub Action to automatically deploy a Next.js site to Ver
 
 To adapt this template to your repository, update the `.env` files to reflect your repository's URL. Ensure that `NEXT_PUBLIC_URL` matches your local development server URL in `.env.development` and your Vercel URL in `.env.production`.
 
-    **.env.development**
+- **.env.development**
 
     ```env
-    NEXT_PUBLIC_URL=http://localhost:3000
+    NEXT_PUBLIC_URL=https://localhost:3000
     ```
 
-    **.env.production**
+- **.env.production**
 
     ```env
-    NEXT_PUBLIC_URL=http://your-repo-name.vercel.app
+    NEXT_PUBLIC_URL=https://your-repo-name.vercel.app
     ```
 
 ## 🤝 Contributing
