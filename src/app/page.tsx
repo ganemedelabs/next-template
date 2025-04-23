@@ -1,6 +1,14 @@
+"use client";
+
 import Logo from "@/components/logo";
+import { useEffect } from "react";
+import * as serviceWorkerRegistration from "@/utils/serviceWorkerRegistration";
 
 export default function Home() {
+    useEffect(() => {
+        serviceWorkerRegistration.register();
+    }, []);
+
     return (
         <main className="relative flex h-screen items-center justify-center font-sans">
             <div className="bg-secondary absolute h-80 w-80 blur-[10rem]" />
